@@ -198,5 +198,9 @@ Outputs:
 
 ## License
 
-MIT
+This project is licensed under the **GNU General Public License v3.0 (GPL-3.0)**.
+
+You are free to use, modify and distribute this software under the terms of the GPL-3.0 license. Any derivative work distributed publicly must also be licensed under GPL-3.0 and its source code must be made available.
+
+For details, see the `LICENSE` file or visit the GNU GPL-3.0 license page: https://www.gnu.org/licenses/gpl-3.0.html
 
