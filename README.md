@@ -1,6 +1,6 @@
 # static-website-toolkit
 
-A lightweight, file-based Static Site Generator (SSG) for Node.js with support for HTML templates, dynamic page generation, SQLite-powered content, incremental builds, and sitemap generation.
+A lightweight, file-based Static Site Generator (SSG) cum quick automation tool for Node.js with support for HTML templates, static content migration, dynamic page generation, SQLite-powered content, incremental builds, and sitemap generation.
 
 ## Features
 
