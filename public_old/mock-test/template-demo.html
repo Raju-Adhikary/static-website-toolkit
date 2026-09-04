@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <!-- Demonstrates reusable template include and canonical URL generation -->
+    <meta charset="UTF-8">
+    <title>Template Demo</title>
+    <meta data-ssg="canonical">
+</head>
+<body>
+    <div data-ssg="template demo-header"></div>
+
+    <!-- Demonstrates inline JSON fixture data for test and documentation -->
+    <div data-ssg="setVar --as=page --type=json">
+        {
+            "title": "Template + Data Demo",
+            "showNotice": true,
+            "features": [
+                {"name": "template", "expected": "Header and footer are inserted"},
+                {"name": "loop", "expected": "One list item is rendered per feature"},
+                {"name": "if", "expected": "Only the true branch is rendered"}
+            ]
+        }
+    </div>
+
+    <!-- Expected output: title text comes from page.title -->
+    <h1 data-ssg="getVar page.title --preserveTag"></h1>
+
+    <!-- Expected output: three <li> rows from page.features -->
+    <ul>
+        <span data-ssg="loop page.features --as=feature">
+            <li>
+                <strong data-ssg="getVar feature.name --preserveTag"></strong>
+                <span data-ssg="getVar feature.expected --preserveTag"></span>
+            </li>
+        </span>
+    </ul>
+
+    <!-- Expected output: only this message renders because showNotice=true -->
+    <div data-ssg="if page.showNotice">
+        <p>Conditional branch active.</p>
+        <div data-ssg="else">
+            <p>This else block should not appear in output.</p>
+        </div>
+    </div>
+
+    <div data-ssg="template demo-footer"></div>
+</body>
+</html>

@@ -1,0 +1,18 @@
+{
+    "title": "Template + Data Demo",
+    "showNotice": true,
+    "features": [
+        {
+            "name": "template",
+            "expected": "Header and footer are inserted"
+        },
+        {
+            "name": "loop",
+            "expected": "One list item is rendered per feature"
+        },
+        {
+            "name": "if",
+            "expected": "Only the true branch is rendered"
+        }
+    ]
+}

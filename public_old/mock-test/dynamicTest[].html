@@ -1,0 +1,17 @@
+[!dynamicLink testController "dynamic-test/[p]/index.html"]
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Dynamic Link Demo</title>
+</head>
+<body>
+    <div data-ssg="template demo-header"></div>
+
+    <!-- Expected output: this page is generated once for each controller row -->
+    <h1 data-ssg="getVar _DL.p --preserveTag"></h1>
+    <p data-ssg="getVar _DL.t --preserveTag"></p>
+
+    <div data-ssg="template demo-footer"></div>
+</body>
+</html>
