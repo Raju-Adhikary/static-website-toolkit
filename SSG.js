@@ -1,9 +1,10 @@
 process.chdir(__dirname);
-const { JSDOM } = require("jsdom");
 const fs = require("fs");
 const path = require("path");
+const os = require("os");
 const crypto = require("crypto");
 const sqlite = require("node:sqlite");
+const { spawnSync } = require("node:child_process");
 
 /*=================================
 // NOTE: 
@@ -46,6 +47,7 @@ const IGNORE_FILES = {
 
 
 const systemCommand = process.argv[2];
+const WORKER_RENDER_COMMAND = "__render_page_worker";
 if(!systemCommand) console.log(`
 Usage: node ssg.js [command]
    build                   compile template/migrate and produce build html
@@ -842,6 +844,44 @@ function parseHTML(window, fullPath, globalCTX) {
     //return JSON.stringify(extractedData, null, 1);
 }
 
+function renderPageInWorker(fileContent, fullPath, globalCTX) {
+    const fileToken = `ssg-render-${process.pid}-${Date.now()}-${crypto.randomBytes(16).toString("hex")}`;
+    const workerInputPath = path.join(os.tmpdir(), `${fileToken}.input.json`);
+    const workerOutputPath = path.join(os.tmpdir(), `${fileToken}.output.json`);
+
+    try {
+        fs.writeFileSync(workerInputPath, JSON.stringify({ fileContent, fullPath, globalCTX }), { mode: 0o600 });
+
+        const workerResult = spawnSync(
+            process.execPath,
+            [__filename, WORKER_RENDER_COMMAND, workerInputPath, workerOutputPath],
+            { encoding: "utf8" }
+        );
+
+        if (workerResult.error) {
+            throw workerResult.error;
+        }
+
+        if (workerResult.status !== 0) {
+            throw new Error(workerResult.stderr?.trim() || `Render worker exited with status ${workerResult.status}`);
+        }
+
+        if (!fs.existsSync(workerOutputPath)) {
+            throw new Error("Render worker did not produce output");
+        }
+
+        const workerPayload = JSON.parse(fs.readFileSync(workerOutputPath, "utf8"));
+        if (!workerPayload.ok) {
+            throw new Error(workerPayload.error || "Render worker failed");
+        }
+
+        return workerPayload.html;
+    } finally {
+        if (fs.existsSync(workerInputPath)) fs.unlinkSync(workerInputPath);
+        if (fs.existsSync(workerOutputPath)) fs.unlinkSync(workerOutputPath);
+    }
+}
+
 function handleHTML(fullPath, outputPath, writeOutputCB){
     const fileContent = fs.readFileSync(fullPath, "utf8").trim();
     
@@ -859,14 +899,8 @@ function handleHTML(fullPath, outputPath, writeOutputCB){
         //// NOTE that doesn't check dependencies
         if(!fileTracker.hasStaticChanged(fullPath)) return;
         
-        const dom = new JSDOM(fileMainContent , {
-            runScripts: undefined,
-            resources: undefined,
-            pretendToBeVisual: false
-        });
-        const parsedHTML = parseHTML(dom.window, fullPath);
+        const parsedHTML = renderPageInWorker(fileMainContent, fullPath);
         writeOutputCB([outputPath, parsedHTML ? "<!doctype html>\n"+parsedHTML : fileMainContent]);
-        dom.window.close();
         
         return;
     }
@@ -930,15 +964,8 @@ function handleHTML(fullPath, outputPath, writeOutputCB){
             
             process.stdout.write(`\rDynamic Link - ${DLpageNo}: ${inPath}`);
             
-            const dom = new JSDOM(fileMainContent, {
-                runScripts: undefined,
-                resources: undefined,
-                pretendToBeVisual: false
-            });
-            
-            const parsedHTML = parseHTML(dom.window, inPath, { _DL : pageData });
+            const parsedHTML = renderPageInWorker(fileMainContent, inPath, { _DL : pageData });
             writeOutputCB([outPath, parsedHTML ? "<!doctype html>\n"+parsedHTML : fileMainContent]);
-            dom.window.close();
             
             process.stdout.clearLine(0);
             process.stdout.cursorTo(0);
@@ -1044,6 +1071,45 @@ const manageByExt = {
     ".json" (p) {
         this._commonProfile1( p.fullPath, p.outputPath, "json" );
     }
+}
+
+function runRenderWorker() {
+    const workerInputPath = process.argv[3];
+    const workerOutputPath = process.argv[4];
+
+    if (!workerInputPath || !workerOutputPath) {
+        process.stderr.write("Usage: node ssg.js __render_page_worker <input.json> <output.json>\n");
+        process.exit(1);
+    }
+
+    try {
+        const workerInput = JSON.parse(fs.readFileSync(workerInputPath, "utf8"));
+        const { JSDOM } = require("jsdom");
+        const dom = new JSDOM(workerInput.fileContent, {
+            runScripts: undefined,
+            resources: undefined,
+            pretendToBeVisual: false
+        });
+
+        try {
+            const parsedHTML = parseHTML(dom.window, workerInput.fullPath, workerInput.globalCTX);
+            fs.writeFileSync(workerOutputPath, JSON.stringify({ ok: true, html: parsedHTML }));
+        } finally {
+            dom.window.close();
+        }
+    } catch (error) {
+        fs.writeFileSync(workerOutputPath, JSON.stringify({
+            ok: false,
+            error: error?.stack || String(error)
+        }));
+        process.stderr.write((error?.stack || String(error)) + "\n");
+        process.exitCode = 1;
+    }
+}
+
+if (systemCommand === WORKER_RENDER_COMMAND) {
+    runRenderWorker();
+    process.exit(process.exitCode || 0);
 }
 
 const fileTracker = new FileTracker(HASH_DB_FILE);
