@@ -30,7 +30,7 @@ const LIMITED_FILES = {
     // start include SOURCE_PATH
     active : false,
     files : [
-        "public_old/mock-test/dynamicTest[].html"
+        "public_old/examples/dynamic-demo[].html"
     ]
 }
 
@@ -40,7 +40,7 @@ const IGNORE_FILES = {
     // start include SOURCE_PATH
     active : false,
     files : [
-        "public_old/mock-test/dynamicTest[].html"
+        "public_old/examples/dynamic-demo[].html"
     ]
 }
 

@@ -67,10 +67,10 @@ node ssg.js sitemap
 
 The repository now includes self-documenting fixture files you can use for both testing and onboarding:
 
-- `public_old/mock-test/template-demo.html`
+- `public_old/examples/template-demo.html`
   - Shows `template`, `setVar`, `getVar`, `loop`, `if`, and `canonical`
   - Includes inline comments describing expected rendered output
-- `public_old/mock-test/dynamicTest[].html`
+- `public_old/examples/dynamic-demo[].html`
   - Shows `dynamicLink` with `testController`
   - Generates one output page per dataset item (for the default controller: `prime` and `prime2`)
 - `templates/demo-header.html` and `templates/demo-footer.html`
