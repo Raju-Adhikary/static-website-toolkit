@@ -1077,6 +1077,11 @@ function runRenderWorker() {
     const workerInputPath = process.argv[3];
     const workerOutputPath = process.argv[4];
 
+    if (!workerInputPath || !workerOutputPath) {
+        process.stderr.write("Usage: node ssg.js __render_page_worker <input.json> <output.json>\n");
+        process.exit(1);
+    }
+
     try {
         const workerInput = JSON.parse(fs.readFileSync(workerInputPath, "utf8"));
         const { JSDOM } = require("jsdom");
