@@ -845,12 +845,12 @@ function parseHTML(window, fullPath, globalCTX) {
 }
 
 function renderPageInWorker(fileContent, fullPath, globalCTX) {
-    const fileToken = `ssg-render-${process.pid}-${Date.now()}-${Math.random().toString(16).slice(2)}`;
+    const fileToken = `ssg-render-${process.pid}-${Date.now()}-${crypto.randomBytes(16).toString("hex")}`;
     const workerInputPath = path.join(os.tmpdir(), `${fileToken}.input.json`);
     const workerOutputPath = path.join(os.tmpdir(), `${fileToken}.output.json`);
 
     try {
-        fs.writeFileSync(workerInputPath, JSON.stringify({ fileContent, fullPath, globalCTX }));
+        fs.writeFileSync(workerInputPath, JSON.stringify({ fileContent, fullPath, globalCTX }), { mode: 0o600 });
 
         const workerResult = spawnSync(
             process.execPath,
