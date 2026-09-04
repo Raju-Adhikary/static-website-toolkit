@@ -63,6 +63,27 @@ Generate sitemap:
 node ssg.js sitemap
 ```
 
+## Demo / Test Fixtures
+
+The repository now includes self-documenting fixture files you can use for both testing and onboarding:
+
+- `public_old/examples/template-demo.html`
+  - Shows `template`, `setVar`, `getVar`, `loop`, `if`, and `canonical`
+  - Includes inline comments describing expected rendered output
+- `public_old/examples/dynamic-demo[].html`
+  - Shows `dynamicLink` with `testController`
+  - Generates one output page per dataset item (for the default controller: `prime` and `prime2`)
+- `templates/demo-header.html` and `templates/demo-footer.html`
+  - Reusable template fragments consumed by the fixture pages
+- `data/mock-page-data.json`
+  - Sample fixture data mirroring the inline JSON used in the demo page
+
+Run the demo build:
+
+```bash
+node SSG.js build
+```
+
 ## Configuration
 
 Edit the constants near the top of `ssg.js`.
@@ -203,4 +224,3 @@ This project is licensed under the **GNU General Public License v3.0 (GPL-3.0)**
 You are free to use, modify and distribute this software under the terms of the GPL-3.0 license. Any derivative work distributed publicly must also be licensed under GPL-3.0 and its source code must be made available.
 
 For details, see the `LICENSE` file or visit the GNU GPL-3.0 license page: https://www.gnu.org/licenses/gpl-3.0.html
-

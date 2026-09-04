@@ -30,7 +30,7 @@ const LIMITED_FILES = {
     // start include SOURCE_PATH
     active : false,
     files : [
-        "public_old/mock-test/dynamicTest[].html"
+        "public_old/examples/dynamic-demo[].html"
     ]
 }
 
@@ -40,7 +40,7 @@ const IGNORE_FILES = {
     // start include SOURCE_PATH
     active : false,
     files : [
-        "public_old/mock-test/dynamicTest[].html"
+        "public_old/examples/dynamic-demo[].html"
     ]
 }
 
@@ -967,8 +967,10 @@ function handleHTML(fullPath, outputPath, writeOutputCB){
             const parsedHTML = renderPageInWorker(fileMainContent, inPath, { _DL : pageData });
             writeOutputCB([outPath, parsedHTML ? "<!doctype html>\n"+parsedHTML : fileMainContent]);
             
-            process.stdout.clearLine(0);
-            process.stdout.cursorTo(0);
+            if (typeof process.stdout.clearLine === "function" && typeof process.stdout.cursorTo === "function") {
+                process.stdout.clearLine(0);
+                process.stdout.cursorTo(0);
+            }
             
             // stage updeted file
             fileTracker.stageDynamic(fullPath, inPath);
